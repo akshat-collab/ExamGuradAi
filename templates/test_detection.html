@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        video {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 8px;
+            background: #000;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .status.good {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        canvas {
+            display: none;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Face Detection Test Mode</h1>
+        <p>This page helps you test and calibrate the face detection system</p>
+        
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+        
+        <div id="status" class="status good">
+            Initializing camera...
+        </div>
+        
+        <div class="controls">
+            <button class="btn-primary" onclick="location.href='/'">Back to Home</button>
+            <button class="btn-secondary" onclick="location.href='/exam'">Go to Exam</button>
+        </div>
+        
+        <div style="text-align: left; margin-top: 20px;">
+            <h3>Detection Log:</h3>
+            <div id="log" style="background: #f8f9fa; padding: 15px; border-radius: 5px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let video, canvas, ctx;
+        let detectionInterval;
+
+        async function initWebcam() {
+            try {
+                video = document.getElementById('webcam');
+                canvas = document.getElementById('canvas');
+                ctx = canvas.getContext('2d');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                video.srcObject = stream;
+                
+                canvas.width = 640;
+                canvas.height = 480;
+                
+                startDetection();
+            } catch (error) {
+                document.getElementById('status').textContent = 'Camera access denied';
+                document.getElementById('status').className = 'status danger';
+            }
+        }
+
+        function startDetection() {
+            detectionInterval = setInterval(async () => {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const frameData = canvas.toDataURL('image/jpeg', 0.8);
+                
+                try {
+                    const response = await fetch('/detect_cheating', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ frame: frameData })
+                    });
+                    
+                    const result = await response.json();
+                    updateStatus(result);
+                    logDetection(result);
+                } catch (error) {
+                    console.error('Detection error:', error);
+                }
+            }, 2000);
+        }
+
+        function updateStatus(result) {
+            const statusEl = document.getElementById('status');
+            
+            let statusText = '';
+            let statusClass = 'status good';
+            
+            if (result.faces === 1 && !result.wearing_mask && result.head_pose === 'looking_forward' && result.lighting === 'good') {
+                statusText = '✓ Perfect: All checks passed';
+                statusClass = 'status good';
+            } else if (result.faces === 0) {
+                statusText = '⚠ Warning: No Face Detected';
+                statusClass = 'status warning';
+            } else if (result.faces > 1) {
+                statusText = `🚨 Alert: ${result.faces} Faces Detected`;
+                statusClass = 'status danger';
+            } else if (result.wearing_mask) {
+                statusText = '⚠ Warning: Face Mask Detected';
+                statusClass = 'status warning';
+            } else if (result.head_pose !== 'looking_forward') {
+                statusText = `⚠ Warning: Student ${result.head_pose.replace('_', ' ')}`;
+                statusClass = 'status warning';
+            } else if (result.lighting !== 'good') {
+                statusText = `⚠ Warning: Lighting ${result.lighting.replace('_', ' ')}`;
+                statusClass = 'status warning';
+            }
+            
+            statusEl.textContent = statusText;
+            statusEl.className = statusClass;
+        }
+
+        function logDetection(result) {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let details = `Faces: ${result.faces}, Pose: ${result.head_pose}, Light: ${result.lighting}, Mask: ${result.wearing_mask}`;
+            if (result.violations && result.violations.length > 0) {
+                details += ` | VIOLATIONS: ${result.violations.join(', ')}`;
+            }
+            
+            const entry = `[${timestamp}] ${details}\n`;
+            logEl.textContent = entry + logEl.textContent;
+        }
+
+        window.onload = initWebcam;
+    </script>
+</body>
+</html>

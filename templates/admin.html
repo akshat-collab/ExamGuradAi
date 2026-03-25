@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script>(function(){try{var k='examguard-theme',t=localStorage.getItem(k)||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamGuard AI — Admin Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <style>
+    body { background: #0a0a14; }
+
+    .admin-header {
+      background: rgba(10,10,20,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .admin-badge {
+      background: rgba(255,101,132,0.15);
+      border: 1px solid rgba(255,101,132,0.3);
+      color: #ff6584;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-actions a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .header-actions a:hover { color: #a78bfa; }
+
+    .admin-body {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    .page-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 12px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: white;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .tab-btn.active {
+      color: white;
+      background: rgba(108,99,255,0.2);
+      border-color: rgba(108,99,255,0.35);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(108,99,255,0.3);
+      background: rgba(108,99,255,0.06);
+      transform: translateY(-3px);
+    }
+
+    .stat-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.purple { background: rgba(108,99,255,0.2); }
+    .stat-icon.red { background: rgba(255,101,132,0.2); }
+    .stat-icon.green { background: rgba(67,233,123,0.2); }
+    .stat-icon.orange { background: rgba(247,151,30,0.2); }
+    .stat-icon.teal { background: rgba(56,249,215,0.15); }
+
+    .stat-info .num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-info .lbl {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .table-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .table-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--success);
+      background: rgba(67,233,123,0.1);
+      border: 1px solid rgba(67,233,123,0.2);
+      padding: 4px 12px;
+      border-radius: 50px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    tbody td {
+      padding: 16px 20px;
+      font-size: 14px;
+      color: var(--text);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    tbody tr:hover td { background: rgba(255,255,255,0.03); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .violation-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .violation-chip.ai { background: rgba(255,101,132,0.15); color: #ff6584; border: 1px solid rgba(255,101,132,0.2); }
+    .violation-chip.security { background: rgba(247,151,30,0.15); color: var(--warning); border: 1px solid rgba(247,151,30,0.2); }
+    .violation-chip.tab { background: rgba(108,99,255,0.15); color: #a78bfa; border: 1px solid rgba(108,99,255,0.2); }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+    .score-pill {
+      font-weight: 700;
+      color: #7cf0c6;
+    }
+
+    .link-evidence {
+      color: #a78bfa;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .link-evidence:hover { text-decoration: underline; }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .chart-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 20px 22px 24px;
+      min-height: 280px;
+    }
+
+    .chart-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin: 0 0 16px;
+    }
+
+    .chart-card .chart-wrap {
+      position: relative;
+      height: 220px;
+    }
+
+    .btn-danger-sm {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff6584, #ff4757);
+      color: #fff;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+
+    .btn-danger-sm:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255,101,132,0.35);
+    }
+
+    .btn-danger-sm:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .danger-zone {
+      margin-top: 32px;
+      padding: 24px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,101,132,0.25);
+      background: rgba(255,101,132,0.06);
+    }
+
+    .danger-zone h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: #ff6584;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .danger-zone p {
+      margin: 0 0 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .danger-zone__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .danger-zone__actions button {
+      font-size: 12px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .danger-zone__actions button:hover {
+      border-color: rgba(255,101,132,0.4);
+      color: #ff6584;
+    }
+
+    .btn-purge {
+      background: linear-gradient(135deg, #ff4757, #c0392b) !important;
+      color: #fff !important;
+      border: none !important;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+</head>
+<body class="admin-dashboard">
+  <header class="admin-header">
+    <div class="brand">
+      <span>🛡️</span>
+      <span>ExamGuard AI</span>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <div class="header-actions">
+      <label class="theme-toggle" title="Light / dark theme">
+        <input type="checkbox" class="theme-toggle-input" aria-label="Use light theme">
+        <span class="theme-toggle-track"><span class="theme-toggle-knob"></span></span>
+        <span class="theme-toggle-label-text">Light</span>
+      </label>
+      <a href="/">Home</a>
+      <a href="/student">Student login</a>
+      <button type="button" class="btn-secondary" id="btnRefresh" style="padding:8px 16px;font-size:13px;">Refresh data</button>
+      <div class="status-badge active">
+        <span class="status-dot"></span>
+        Live
+      </div>
+    </div>
+  </header>
+
+  <div class="admin-body">
+    <h1 class="page-title">Operations</h1>
+    <p class="page-subtitle">Monitor sessions, violations, roster, and graded attempts — data refreshes every few seconds on the violations tab.</p>
+
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
+      <button type="button" class="tab-btn" data-tab="violations">Violations</button>
+      <button type="button" class="tab-btn" data-tab="students">Students</button>
+      <button type="button" class="tab-btn" data-tab="results">Exam results</button>
+    </div>
+
+    <div id="panel-overview" class="tab-panel active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple">👥</div>
+          <div class="stat-info">
+            <div class="num" id="dashStudents">—</div>
+            <div class="lbl">Students registered</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">🚨</div>
+          <div class="stat-info">
+            <div class="num" id="dashViolations">—</div>
+            <div class="lbl">Violation events</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">📝</div>
+          <div class="stat-info">
+            <div class="num" id="dashSubmissions">—</div>
+            <div class="lbl">Exam submissions</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon teal">📈</div>
+          <div class="stat-info">
+            <div class="num" id="dashAvg">—</div>
+            <div class="lbl">Avg score (submitted)</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">⬆️</div>
+          <div class="stat-info">
+            <div class="num" id="dashMax">—</div>
+            <div class="lbl">High score</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">⬇️</div>
+          <div class="stat-info">
+            <div class="num" id="dashMin">—</div>
+            <div class="lbl">Low score</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Violations (14 days)</h3>
+          <div class="chart-wrap"><canvas id="chartViolations"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Exam submissions (14 days)</h3>
+          <div class="chart-wrap"><canvas id="chartSubmissions"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>MCQ score distribution</h3>
+          <div class="chart-wrap"><canvas id="chartScores"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Top violation types</h3>
+          <div class="chart-wrap"><canvas id="chartTypes"></canvas></div>
+        </div>
+      </div>
+
+      <div class="danger-zone">
+        <h3>Data management</h3>
+        <p>Delete individual rows from each tab, or clear entire tables. <strong>Purge all</strong> removes students, results, violations, and evidence files. This cannot be undone.</p>
+        <div class="danger-zone__actions">
+          <button type="button" id="btnClearViolations">Clear all violations</button>
+          <button type="button" id="btnClearStudents">Clear all students</button>
+          <button type="button" id="btnClearResults">Clear all results</button>
+          <button type="button" class="btn-purge" id="btnPurgeAll">Purge all platform data</button>
+        </div>
+      </div>
+
+      <p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin-top:28px;">
+        Use <strong style="color:#a78bfa;">Violations</strong> for the live feed, CSV export, and per-row delete.
+        <strong style="color:#7cf0c6;">Students</strong> and <strong style="color:#fff;">Exam results</strong> support delete for GDPR-style cleanup.
+      </p>
+    </div>
+
+    <div id="panel-violations" class="tab-panel">
+      <div class="toolbar">
+        <a class="btn-secondary" href="/api/export/violations.csv" style="display:inline-block;text-decoration:none;padding:10px 18px;font-size:13px;">⬇ Export CSV</a>
+        <button type="button" class="btn-secondary" id="btnViolationsClearAll" style="padding:10px 18px;font-size:13px;">Clear all violations</button>
+        <span style="color:var(--text-muted);font-size:13px;">Evidence opens in a new tab when available.</span>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <h2>Recent violations</h2>
+          <div class="live-badge">
+            <span class="status-dot"></span>
+            Auto-refresh · 5s
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student</th>
+              <th>Reg. number</th>
+              <th>Violation</th>
+              <th>Timestamp</th>
+              <th>Evidence</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="violationsTable">
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="icon">📋</div>
+                  <p>Loading violations…</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="panel-students" class="tab-panel">
+      <div class="table-card">
+        <div class="table-header">
+          <h2>Student roster</h2>
+          <button type="button" class="btn-secondary" id="btnStudentsClearAll" style="padding:8px 14px;font-size:12px;">Clear all students</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Registration</th>
+              <th>Last login</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTable">
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
+                  <div class="icon">👥</div>
+                  <p>Loading students…</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="panel-results" class="tab-panel">
+      <div class="table-card">
+        <div class="table-header">
+          <h2>Latest exam results</h2>
+          <button type="button" class="btn-secondary" id="btnResultsClearAll" style="padding:8px 14px;font-size:12px;">Clear all results</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student</th>
+              <th>Registration</th>
+              <th>Score</th>
+              <th>%</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTable">
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="icon">📝</div>
+                  <p>Loading results…</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>
