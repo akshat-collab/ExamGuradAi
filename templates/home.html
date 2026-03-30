@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script>(function(){try{var k='examguard-theme',t=localStorage.getItem(k)||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamGuard AI — Enterprise AI Proctoring Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body class="landing-body">
+  <div class="landing-bg" aria-hidden="true"></div>
+  <div class="landing-particles" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <header class="landing-nav">
+    <a href="/" class="landing-nav__brand">
+      <span class="landing-nav__logo" aria-hidden="true">🛡️</span>
+      <span class="landing-nav__name">ExamGuard <span>AI</span></span>
+    </a>
+
+    <nav class="landing-nav__links" id="navLinks" aria-label="Primary">
+      <a href="#features">Features</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="/api/health" target="_blank" rel="noopener">API</a>
+    </nav>
+
+    <div class="landing-nav__right">
+      <label class="theme-toggle" title="Light / dark theme">
+        <input type="checkbox" class="theme-toggle-input" aria-label="Use light theme">
+        <span class="theme-toggle-track"><span class="theme-toggle-knob"></span></span>
+        <span class="theme-toggle-label-text">Light</span>
+      </label>
+      <span class="landing-status" id="navStatus" title="Health check">
+        <span class="landing-status__dot" aria-hidden="true"></span>
+        <span id="navStatusText">Checking…</span>
+      </span>
+      <span class="landing-api-badge">REST · Production</span>
+      <a href="{{ url_for('student_login_page') }}" class="landing-nav__login">Login</a>
+      <button type="button" class="landing-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    </div>
+  </header>
+
+  <main class="landing-wrap">
+    <!-- Hero -->
+    <section class="landing-hero" aria-labelledby="hero-title">
+      <div class="landing-hero__content">
+        <div class="landing-hero__badge-row">
+          <span class="landing-hero__mini-badge">SOC2-ready architecture</span>
+          <span class="landing-hero__mini-badge">Edge-optimized inference</span>
+        </div>
+        <h1 id="hero-title" class="landing-hero__title">
+          Secure, <span class="gradient-text">AI-Powered</span> Online Examinations
+        </h1>
+        <p class="landing-hero__sub">
+          Real-time proctoring, violation detection, and analytics for institutions. Enterprise-grade monitoring with sub-second signal processing and audit-ready exports.
+        </p>
+        <div class="landing-hero__cta">
+          <a href="{{ url_for('student_login_page') }}" class="btn-landing-primary">Start Exam</a>
+          <a href="{{ url_for('admin_page') }}" class="btn-landing-secondary">View Dashboard</a>
+        </div>
+        <div class="landing-hero__trust">
+          <span><span class="dot" aria-hidden="true"></span> AI Proctoring</span>
+          <span><span class="dot" aria-hidden="true"></span> Real-time Alerts</span>
+          <span><span class="dot" aria-hidden="true"></span> Secure Infrastructure</span>
+        </div>
+      </div>
+      <div class="landing-hero__visual">
+        <div class="landing-hero__glass">
+          <div class="landing-mock-mini">
+            <div class="landing-mock-mini__row">
+              <span class="landing-mock-mini__label">Live sessions</span>
+              <span class="landing-mock-mini__value" id="heroStatSessions">2,847</span>
+            </div>
+            <div class="landing-mock-bars" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="landing-mock-mini__row" style="margin-top:8px">
+              <span class="landing-mock-mini__label">Detection latency</span>
+              <span class="landing-mock-mini__value" style="font-size:1.1rem">&lt; 1s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feature cards -->
+    <section class="landing-section" id="features" aria-labelledby="features-title">
+      <div class="landing-section__head">
+        <p class="landing-section__eyebrow">Platform</p>
+        <h2 id="features-title" class="landing-section__title">Everything you need to run trusted exams</h2>
+        <p class="landing-section__desc">Structured workflows for candidates, administrators, and engineering teams—without compromising on security or clarity.</p>
+      </div>
+      <div class="landing-cards">
+        <a class="landing-card" href="{{ url_for('student_login_page') }}">
+          <div class="landing-card__badges">
+            <span class="landing-badge landing-badge--live">Live</span>
+            <span class="landing-badge landing-badge--ai">AI Powered</span>
+          </div>
+          <div class="landing-card__icon" aria-hidden="true">🎓</div>
+          <h3 class="landing-card__title">Student Exam</h3>
+          <p class="landing-card__micro">AI monitors behaviour in real-time during the assessment window.</p>
+          <p class="landing-card__desc">Secure candidate login, mixed question types (MCQ, short answer, written), and continuous vision-based integrity checks with privacy-first consent.</p>
+          <span class="landing-card__cta">Launch exam portal →</span>
+        </a>
+        <a class="landing-card" href="{{ url_for('admin_page') }}">
+          <div class="landing-card__badges">
+            <span class="landing-badge landing-badge--live">Live</span>
+            <span class="landing-badge landing-badge--ai">Analytics</span>
+          </div>
+          <div class="landing-card__icon" aria-hidden="true">📊</div>
+          <h3 class="landing-card__title">Admin Dashboard</h3>
+          <p class="landing-card__micro">Export reports &amp; audit logs for compliance reviews.</p>
+          <p class="landing-card__desc">Violations feed, student roster, exam results, CSV exports, and evidence viewer—designed for operations teams and academic integrity offices.</p>
+          <span class="landing-card__cta">Open operations console →</span>
+        </a>
+        <a class="landing-card" href="{{ url_for('test_detection') }}">
+          <div class="landing-card__badges">
+            <span class="landing-badge landing-badge--beta">Lab</span>
+            <span class="landing-badge landing-badge--ai">Vision</span>
+          </div>
+          <div class="landing-card__icon" aria-hidden="true">🧪</div>
+          <h3 class="landing-card__title">Detection Lab</h3>
+          <p class="landing-card__micro">Validate models before go-live in your environment.</p>
+          <p class="landing-card__desc">Isolated pipeline testing for demos, calibration, and exhibition deployments—mirror production signals without touching live candidate data.</p>
+          <span class="landing-card__cta">Open detection lab →</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Capabilities -->
+    <section class="landing-section" id="capabilities" aria-labelledby="cap-title">
+      <div class="landing-section__head">
+        <p class="landing-section__eyebrow">Capabilities</p>
+        <h2 id="cap-title" class="landing-section__title">Signals we watch—so you don’t have to</h2>
+        <p class="landing-section__desc">A unified integrity layer that combines computer vision, browser telemetry, and alerting into one operational surface.</p>
+      </div>
+      <div class="landing-cap-grid">
+        <article class="landing-cap">
+          <div class="landing-cap__icon" aria-hidden="true">👤</div>
+          <div>
+            <h3>AI face detection</h3>
+            <p>Multi-face, absence, and pose heuristics with configurable sensitivity for your institution’s policy.</p>
+          </div>
+        </article>
+        <article class="landing-cap">
+          <div class="landing-cap__icon" aria-hidden="true">🔀</div>
+          <div>
+            <h3>Tab switching detection</h3>
+            <p>Visibility and focus events correlated with session timeline for rapid reviewer triage.</p>
+          </div>
+        </article>
+        <article class="landing-cap">
+          <div class="landing-cap__icon" aria-hidden="true">🎙️</div>
+          <div>
+            <h3>Audio monitoring</h3>
+            <p>Enterprise roadmap: ambient channel analysis for anomaly cues alongside video (availability varies by deployment).</p>
+          </div>
+        </article>
+        <article class="landing-cap">
+          <div class="landing-cap__icon" aria-hidden="true">⚡</div>
+          <div>
+            <h3>Suspicious activity alerts</h3>
+            <p>Instant notifications to configured endpoints when thresholds breach—email and webhook-ready patterns.</p>
+          </div>
+        </article>
+        <article class="landing-cap">
+          <div class="landing-cap__icon" aria-hidden="true">📄</div>
+          <div>
+            <h3>Report generation</h3>
+            <p>Structured exports for violations, submissions, and audit trails—CSV and API-backed JSON.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Dashboard preview -->
+    <section class="landing-section" id="dashboard" aria-labelledby="dash-title">
+      <div class="landing-section__head">
+        <p class="landing-section__eyebrow">Operations</p>
+        <h2 id="dash-title" class="landing-section__title">Command center your team will actually use</h2>
+        <p class="landing-section__desc">Glass surfaces, high-contrast data, and at-a-glance health—mock preview of the admin experience.</p>
+      </div>
+      <div class="landing-dash">
+        <div class="landing-dash__inner">
+          <aside class="landing-dash__sidebar">
+            <div class="landing-dash__nav-item landing-dash__nav-item--active">Overview</div>
+            <div class="landing-dash__nav-item">Violations</div>
+            <div class="landing-dash__nav-item">Students</div>
+            <div class="landing-dash__nav-item">Results</div>
+            <div class="landing-dash__nav-item">Settings</div>
+          </aside>
+          <div class="landing-dash__main">
+            <div class="landing-dash__top">
+              <div class="landing-dash__stat">
+                <label>Active exams</label>
+                <strong>128</strong>
+              </div>
+              <div class="landing-dash__stat">
+                <label>Flags (24h)</label>
+                <strong style="color:#F39C12">34</strong>
+              </div>
+              <div class="landing-dash__stat">
+                <label>Uptime</label>
+                <strong style="color:#00B894">99.9%</strong>
+              </div>
+            </div>
+            <div class="landing-dash__chart" aria-hidden="true">
+              <div></div><div></div><div></div><div></div><div></div><div></div>
+            </div>
+            <div class="landing-dash__split">
+              <div class="landing-dash__panel">
+                <h4>Violations timeline</h4>
+                <div class="landing-timeline">
+                  <div class="landing-timeline__item"><span class="landing-timeline__dot"></span> Tab switch · 14:02</div>
+                  <div class="landing-timeline__item"><span class="landing-timeline__dot"></span> Multi-face · 14:08</div>
+                  <div class="landing-timeline__item"><span class="landing-timeline__dot"></span> Session OK · 14:15</div>
+                </div>
+              </div>
+              <div class="landing-dash__panel">
+                <h4>Student list</h4>
+                <div class="landing-students">
+                  <div class="landing-student-row"><span class="landing-student-row__av"></span> Candidate · 24BET10005</div>
+                  <div class="landing-student-row"><span class="landing-student-row__av"></span> Candidate · 24BET10017</div>
+                  <div class="landing-student-row"><span class="landing-student-row__av"></span> Candidate · 24BET10022</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust -->
+    <section class="landing-section" id="trust" aria-labelledby="trust-title">
+      <div class="landing-section__head">
+        <p class="landing-section__eyebrow">Trust</p>
+        <h2 id="trust-title" class="landing-section__title">Used by institutions worldwide</h2>
+        <p class="landing-section__desc">ExamGuard AI is built for scale—from faculty-led pilots to multi-campus rollouts.</p>
+      </div>
+      <div class="landing-trust-logos">
+        <span class="landing-fake-logo">NEXUS UNIV</span>
+        <span class="landing-fake-logo">GlobalEdu</span>
+        <span class="landing-fake-logo">Apex Institute</span>
+        <span class="landing-fake-logo">Continuum College</span>
+        <span class="landing-fake-logo">Vector Academy</span>
+      </div>
+      <div class="landing-stats">
+        <div class="landing-stat">
+          <div class="landing-stat__num">99.9%</div>
+          <div class="landing-stat__label">Target platform uptime</div>
+        </div>
+        <div class="landing-stat">
+          <div class="landing-stat__num">10K+</div>
+          <div class="landing-stat__label">Exams monitored (cumulative)</div>
+        </div>
+        <div class="landing-stat">
+          <div class="landing-stat__num">&lt;1s</div>
+          <div class="landing-stat__label">Typical detection latency</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <div class="landing-footer__grid">
+      <div>
+        <div class="landing-footer__brand">ExamGuard <span>AI</span></div>
+        <p class="landing-footer__tag">Enterprise-grade AI proctoring: structured, minimal, and data-driven.</p>
+      </div>
+      <div class="landing-footer__col">
+        <h5>Product</h5>
+        <a href="#features">Features</a>
+        <a href="#dashboard">Dashboard</a>
+        <a href="{{ url_for('student_login_page') }}">Exam login</a>
+      </div>
+      <div class="landing-footer__col">
+        <h5>Features</h5>
+        <a href="#capabilities">Capabilities</a>
+        <a href="{{ url_for('admin_page') }}">Admin</a>
+        <a href="{{ url_for('test_detection') }}">Detection lab</a>
+      </div>
+      <div class="landing-footer__col">
+        <h5>Docs</h5>
+        <a href="/api/health" target="_blank" rel="noopener">API health</a>
+        <a href="#trust">Trust &amp; stats</a>
+        <a href="mailto:support@examguard.ai">Contact</a>
+      </div>
+      <div class="landing-footer__col">
+        <h5>Contact</h5>
+        <a href="mailto:support@examguard.ai">support@examguard.ai</a>
+        <a href="#trust">Institution sales</a>
+        <a href="/student">Candidate login</a>
+      </div>
+    </div>
+    <div class="landing-footer__bottom">
+      © <span id="y"></span> ExamGuard AI · Configure alerts via environment variables · <a href="/api/health">System status</a>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+  <script>
+    (function () {
+      document.getElementById('y').textContent = new Date().getFullYear();
+
+      fetch('/api/health')
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var el = document.getElementById('navStatus');
+          var txt = document.getElementById('navStatusText');
+          if (d.status === 'ok') {
+            txt.textContent = 'System operational';
+          } else {
+            el.classList.add('landing-status--degraded');
+            txt.textContent = 'Degraded';
+          }
+        })
+        .catch(function () {
+          var el = document.getElementById('navStatus');
+          el.classList.add('landing-status--degraded');
+          document.getElementById('navStatusText').textContent = 'Unreachable';
+        });
+
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      if (toggle && links) {
+        toggle.addEventListener('click', function () {
+          var open = links.classList.toggle('is-open');
+          toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        links.querySelectorAll('a').forEach(function (a) {
+          a.addEventListener('click', function () {
+            links.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+          });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

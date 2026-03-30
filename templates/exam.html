@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script>(function(){try{var k='examguard-theme',t=localStorage.getItem(k)||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamGuard AI — Examination</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <style>
+    body { background: #0a0a14; overflow: hidden; }
+
+    /* Header */
+    .exam-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 64px;
+      background: rgba(10,10,20,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: white;
+    }
+
+    .timer-display {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      padding: 8px 20px;
+      border-radius: 50px;
+    }
+
+    .timer-display .time {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #a78bfa;
+      letter-spacing: 2px;
+    }
+
+    .timer-display.warning .time { color: var(--warning); }
+    .timer-display.danger .time { color: var(--danger); animation: blink 1s infinite; }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+
+    /* Layout */
+    .exam-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 0;
+      height: calc(100vh - 64px - 68px);
+      margin-top: 64px;
+      margin-bottom: 68px;
+    }
+
+    /* Main Panel */
+    .exam-main {
+      padding: 28px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Question Navigator */
+    .q-navigator {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .q-nav-btn {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .q-nav-btn.answered {
+      background: rgba(67,233,123,0.15);
+      border-color: rgba(67,233,123,0.4);
+      color: var(--success);
+    }
+
+    .q-nav-btn.current {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 0 15px rgba(108,99,255,0.5);
+    }
+
+    /* Question Card */
+    .question-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 36px;
+      flex: 1;
+    }
+
+    .q-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .q-badge {
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      color: #a78bfa;
+      padding: 5px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .q-marks {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .question-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    /* Options */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .option-label {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .option-label input { display: none; }
+
+    .option-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+
+    .option-key {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: all 0.25s;
+    }
+
+    .option-text {
+      font-size: 15px;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .option-label:hover .option-box {
+      border-color: rgba(108,99,255,0.4);
+      background: rgba(108,99,255,0.08);
+      transform: translateY(-2px);
+    }
+
+    .option-label input:checked ~ .option-box {
+      border-color: var(--primary);
+      background: rgba(108,99,255,0.15);
+      box-shadow: 0 0 20px rgba(108,99,255,0.2);
+    }
+
+    .option-label input:checked ~ .option-box .option-key {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Navigation */
+    .nav-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: rgba(10,10,20,0.97);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+    }
+
+    /* Sidebar */
+    .exam-sidebar {
+      background: rgba(255,255,255,0.02);
+      border-left: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-section {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    /* Webcam */
+    .webcam-wrapper {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 4/3;
+    }
+
+    #webcam {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .webcam-overlay {
+      position: absolute;
+      inset: 0;
+      border: 2px solid rgba(67,233,123,0.4);
+      border-radius: 14px;
+      pointer-events: none;
+    }
+
+    .webcam-overlay.warning { border-color: rgba(247,151,30,0.6); }
+    .webcam-overlay.danger { border-color: rgba(255,101,132,0.6); }
+
+    /* Corner brackets */
+    .corner {
+      position: absolute;
+      width: 20px; height: 20px;
+      border-color: var(--success);
+      border-style: solid;
+    }
+
+    .corner.tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+    .corner.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+    .corner.bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+    .corner.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+    .detection-badge {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* Detection Stats */
+    .detection-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat-pill {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .stat-pill .val {
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 2px;
+    }
+
+    .stat-pill .lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Warning Banner */
+    .warning-banner {
+      display: none;
+      margin: 0 20px;
+      padding: 12px 16px;
+      background: rgba(247,151,30,0.1);
+      border: 1px solid rgba(247,151,30,0.3);
+      border-radius: 12px;
+      font-size: 12px;
+      color: var(--warning);
+      text-align: center;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Alert Modal */
+    .alert-modal .alert-icon { font-size: 56px; margin-bottom: 16px; }
+    .alert-modal h2 { font-size: 22px; color: white; margin-bottom: 10px; }
+    .alert-modal p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+
+    /* Confirm Modal */
+    .confirm-modal .confirm-icon { font-size: 48px; margin-bottom: 16px; }
+    .confirm-modal h2 { font-size: 20px; color: white; margin-bottom: 10px; }
+    .confirm-modal p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+    .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+
+    @media (max-width: 900px) {
+      .exam-layout { grid-template-columns: 1fr; }
+      .exam-sidebar { display: none; }
+      .options-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Privacy gate */
+    .privacy-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: linear-gradient(180deg, #06060f 0%, #0f0f1a 100%);
+      overflow-y: auto;
+      padding: 36px 20px 56px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .privacy-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 36px 32px 40px;
+    }
+
+    .privacy-inner h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .privacy-inner .privacy-lead {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .privacy-section {
+      margin-bottom: 22px;
+    }
+
+    .privacy-section h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: #a78bfa;
+      margin-bottom: 10px;
+    }
+
+    .privacy-section p, .privacy-section ul {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .privacy-section ul { padding-left: 20px; margin: 0; }
+    .privacy-section li { margin-bottom: 8px; }
+
+    .privacy-warn {
+      background: rgba(255,101,132,0.08);
+      border: 1px solid rgba(255,101,132,0.25);
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 13px;
+      color: #ffb3c1;
+      line-height: 1.55;
+      margin: 24px 0;
+    }
+
+    .privacy-checks {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .privacy-checks label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .privacy-checks input[type="checkbox"] {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      accent-color: var(--primary);
+    }
+
+    #btnBeginExam {
+      width: 100%;
+      margin-top: 20px;
+      padding: 16px;
+      font-size: 16px;
+      border-radius: 14px;
+    }
+
+    #btnBeginExam:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Exam format strip */
+    .format-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 14px;
+      padding: 12px 16px;
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-radius: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .format-strip strong { color: #fff; margin-right: 4px; }
+
+    .fmt-tag {
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .fmt-tag.mcq { background: rgba(108,99,255,0.2); color: #c4b5fd; }
+    .fmt-tag.short { background: rgba(247,151,30,0.15); color: #f7971e; }
+    .fmt-tag.written { background: rgba(67,233,123,0.12); color: #43e97b; }
+
+    /* Text answers */
+    .exam-text-input {
+      width: 100%;
+      min-height: 120px;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+      line-height: 1.55;
+      resize: vertical;
+      outline: none;
+    }
+
+    .exam-text-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.2);
+    }
+
+    .exam-text-input.written-field { min-height: 220px; }
+
+    .text-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    .q-nav-btn.q-type-mcq { box-shadow: inset 3px 0 0 #6c63ff; }
+    .q-nav-btn.q-type-short { box-shadow: inset 3px 0 0 #f7971e; }
+    .q-nav-btn.q-type-written { box-shadow: inset 3px 0 0 #43e97b; }
+  </style>
+</head>
+<body class="exam-portal">
+  <!-- Privacy & consent (must pass before exam) -->
+  <div id="privacyGate" class="privacy-gate">
+    <div style="position:fixed;top:16px;right:20px;z-index:2100;">
+      <label class="theme-toggle" title="Light / dark theme">
+        <input type="checkbox" class="theme-toggle-input" aria-label="Use light theme">
+        <span class="theme-toggle-track"><span class="theme-toggle-knob"></span></span>
+        <span class="theme-toggle-label-text">Light</span>
+      </label>
+    </div>
+    <div class="privacy-inner">
+      <h1>Privacy &amp; proctoring notice</h1>
+      <p class="privacy-lead">Before you start, read this notice carefully. By continuing, you confirm that you understand how ExamGuard AI processes information during this session. This is a summary for transparency; your school or employer may have additional policies.</p>
+
+      <div class="privacy-section">
+        <h2>Camera &amp; video</h2>
+        <p>Your browser may access your webcam so the system can analyze live frames on the server (or as configured) for proctoring signals such as face count, approximate head pose, lighting, and similar cues. Video is not necessarily recorded in full; snapshots or frames may be saved when a potential integrity issue is flagged.</p>
+      </div>
+
+      <div class="privacy-section">
+        <h2>Automated analysis (AI)</h2>
+        <p>Computer-vision checks run on submitted frames. Results are probabilistic and can be wrong. Flagged events are logged for review by authorized staff—not automatic disciplinary decisions.</p>
+      </div>
+
+      <div class="privacy-section">
+        <h2>Exam answers &amp; question types</h2>
+        <p>This assessment may include <strong style="color:#e8e8f0;">multiple-choice (MCQ)</strong>, <strong style="color:#e8e8f0;">short answer</strong>, and <strong style="color:#e8e8f0;">written</strong> items. All responses you submit are stored with your registration details and timestamp. MCQs may be auto-scored; short and written responses are typically reviewed by your instructor.</p>
+      </div>
+
+      <div class="privacy-section">
+        <h2>Behaviour &amp; device signals</h2>
+        <ul>
+          <li>Events such as leaving the exam tab, window focus changes, blocked shortcuts, and similar browser-level signals may be logged as security events.</li>
+          <li>Technical metadata (e.g. timestamps, session identifiers) may be stored for audit purposes.</li>
+        </ul>
+      </div>
+
+      <div class="privacy-section">
+        <h2>Who can see your data</h2>
+        <p>Authorized administrators and instructors for this deployment can view violations, evidence images, submitted answers, and related logs. Email alerts may be sent to configured administrator addresses when serious flags occur.</p>
+      </div>
+
+      <div class="privacy-section">
+        <h2>Retention &amp; location</h2>
+        <p>Data is stored on servers or devices running this application (e.g. local database and <code style="color:#a78bfa;">violations/</code> folder for images). Retention periods depend on your institution—ask them for deletion or export if applicable.</p>
+      </div>
+
+      <div class="privacy-section">
+        <h2>Your responsibilities</h2>
+        <p>Do not impersonate others. Do not share exam content without permission. Follow all instructions from your invigilator or institution.</p>
+      </div>
+
+      <div class="privacy-warn">
+        <strong style="color:#ff6584;">If you do not agree</strong> with camera access, automated analysis, and logging described above, do not proceed—contact your instructor or exam coordinator.
+      </div>
+
+      <div class="privacy-checks">
+        <label><input type="checkbox" id="privacy-cam"> I understand that my webcam may be used and that frames or images may be analyzed and stored when issues are detected.</label>
+        <label><input type="checkbox" id="privacy-ai"> I understand that automated (AI-assisted) checks are used and may produce false positives; flagged events may be reviewed by staff.</label>
+        <label><input type="checkbox" id="privacy-behaviour"> I understand that tab changes, focus loss, and similar behaviour may be logged as security events.</label>
+        <label><input type="checkbox" id="privacy-answers"> I understand that my answers (including short and written text) will be stored and that MCQs may be auto-scored while other items may be graded later by an instructor.</label>
+        <label><input type="checkbox" id="privacy-accurate"> I will answer honestly and will not give false registration or identity information.</label>
+        <button type="button" class="btn-primary" id="btnBeginExam" disabled>I have read the notice — begin exam</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="examShell" style="display: none;">
+  <!-- Header -->
+  <header class="exam-header">
+    <div class="header-brand">
+      <span>🛡️</span>
+      <span>ExamGuard AI</span>
+      <span class="fmt-tag mcq" style="margin-left:8px;font-size:11px;">MCQ</span>
+      <span class="fmt-tag short" style="font-size:11px;">Short</span>
+      <span class="fmt-tag written" style="font-size:11px;">Written</span>
+    </div>
+    <div class="timer-display" id="timerDisplay">
+      <span>⏱</span>
+      <span class="time" id="timer">60:00</span>
+    </div>
+    <div class="header-actions" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <label class="theme-toggle" title="Light / dark theme" style="transform:scale(0.92);">
+        <input type="checkbox" class="theme-toggle-input" aria-label="Use light theme">
+        <span class="theme-toggle-track"><span class="theme-toggle-knob"></span></span>
+        <span class="theme-toggle-label-text">Light</span>
+      </label>
+      <div class="status-badge active">
+        <span class="status-dot"></span>
+        AI Monitoring Active
+      </div>
+      <button class="btn-danger" onclick="confirmEndTest()">End Test</button>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="exam-layout">
+    <!-- Main -->
+    <div class="exam-main">
+      <div class="format-strip">
+        <strong>Question types:</strong>
+        <span class="fmt-tag mcq">Multiple choice — auto-graded</span>
+        <span class="fmt-tag short">Short answer — instructor review</span>
+        <span class="fmt-tag written">Written — instructor review</span>
+      </div>
+      <!-- Question Navigator -->
+      <div class="q-navigator" id="qNavigator"></div>
+
+      <!-- Question Card -->
+      <div class="question-card">
+        <div class="q-meta">
+          <span class="q-badge" id="qBadge">Question 1 of 5</span>
+          <span class="q-marks">1 Mark</span>
+        </div>
+        <div id="questionContent"></div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="exam-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Live Monitoring</div>
+        <div class="webcam-wrapper">
+          <video id="webcam" autoplay playsinline muted></video>
+          <div class="webcam-overlay" id="webcamOverlay">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+          </div>
+          <div class="detection-badge" id="detectionBadge">Initializing...</div>
+        </div>
+        <canvas id="canvas" style="display:none;"></canvas>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Detection Status</div>
+        <div class="detection-stats">
+          <div class="stat-pill">
+            <div class="val" id="statFaces">—</div>
+            <div class="lbl">Faces</div>
+          </div>
+          <div class="stat-pill">
+            <div class="val" id="statPose">—</div>
+            <div class="lbl">Pose</div>
+          </div>
+          <div class="stat-pill">
+            <div class="val" id="statLight">—</div>
+            <div class="lbl">Lighting</div>
+          </div>
+          <div class="stat-pill">
+            <div class="val" id="statMask">—</div>
+            <div class="lbl">Mask</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="warning-banner" id="warningBanner"></div>
+
+      <div class="sidebar-section" style="margin-top: auto;">
+        <div class="sidebar-title">Exam Progress</div>
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+          Answered: <span id="answeredCount" style="color: var(--success); font-weight: 700;">0</span> / <span id="qTotal">—</span>
+        </div>
+        <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
+          <div id="progressBar" style="height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 3px; width: 0%; transition: width 0.4s ease;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav Bar -->
+  <div class="nav-bar">
+    <button class="btn-secondary" id="prevBtn" onclick="previousQuestion()">← Previous</button>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="btn-secondary" onclick="clearAnswer()">Clear</button>
+      <button class="btn-primary" id="nextBtn" onclick="nextQuestion()">Next →</button>
+      <button class="btn-primary" id="submitBtn" onclick="confirmSubmit()" style="display:none; background: linear-gradient(135deg, #43e97b, #38f9d7); color: #0a0a14; font-weight: 700;">✓ Submit Exam</button>
+    </div>
+  </div>
+
+  <!-- Alert Modal -->
+  <div class="modal" id="alertModal">
+    <div class="modal-content alert-modal">
+      <div class="alert-icon">🚨</div>
+      <h2>Violation Detected</h2>
+      <p id="alertMessage">Your activity has been recorded and reported to the administrator.</p>
+      <button class="btn-primary" onclick="closeModal('alertModal')">I Understand</button>
+    </div>
+  </div>
+
+  <!-- Confirm Submit Modal -->
+  <div class="modal" id="submitModal">
+    <div class="modal-content confirm-modal">
+      <div class="confirm-icon">📋</div>
+      <h2>Submit Exam?</h2>
+      <p>You have answered <strong id="submitAnsweredCount" style="color: var(--success);">0</strong> out of <span id="submitQTotal">—</span> questions.<br>You cannot change answers after submission.</p>
+      <div class="confirm-actions">
+        <button class="btn-secondary" onclick="closeModal('submitModal')">Cancel</button>
+        <button class="btn-primary" onclick="submitExam(true)">Submit Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm End Test Modal -->
+  <div class="modal" id="endModal">
+    <div class="modal-content confirm-modal">
+      <div class="confirm-icon">⚠️</div>
+      <h2>End Test?</h2>
+      <p>Are you sure you want to end the test? Your current answers will be submitted.</p>
+      <div class="confirm-actions">
+        <button class="btn-secondary" onclick="closeModal('endModal')">Cancel</button>
+        <button class="btn-danger" onclick="submitExam(true)">End & Submit</button>
+      </div>
+    </div>
+  </div>
+  </div><!-- /examShell -->
+
+  <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/exam.js') }}"></script>
+</body>
+</html>

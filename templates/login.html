@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script>(function(){try{var k='examguard-theme',t=localStorage.getItem(k)||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamGuard AI — Student Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <style>
+    .login-page {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-wrapper {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      max-width: 1000px;
+      width: 100%;
+      gap: 0;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    }
+
+    /* Left Panel */
+    .login-left {
+      background: linear-gradient(145deg, #6c63ff 0%, #8b5cf6 50%, #a855f7 100%);
+      padding: 60px 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-left::before {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 50%;
+      top: -100px; right: -100px;
+    }
+
+    .login-left::after {
+      content: '';
+      position: absolute;
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+      bottom: -60px; left: -60px;
+    }
+
+    .brand-logo {
+      font-size: 56px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 4px 20px rgba(0,0,0,0.3));
+      animation: logoFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes logoFloat {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(3deg); }
+    }
+
+    .brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .brand-tagline {
+      color: rgba(255,255,255,0.75);
+      font-size: 15px;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .feature-list { list-style: none; }
+
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255,255,255,0.85);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .feature-icon {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Right Panel */
+    .login-right {
+      background: #0f0f1a;
+      padding: 60px 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .login-right h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 6px;
+    }
+
+    .login-right p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 36px;
+    }
+
+    .btn-primary { width: 100%; padding: 16px; font-size: 16px; border-radius: 14px; }
+
+    .error-msg {
+      background: rgba(255,101,132,0.1);
+      border: 1px solid rgba(255,101,132,0.3);
+      color: #ff6584;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .consent-text {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 14px;
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .login-wrapper { grid-template-columns: 1fr; }
+      .login-left { padding: 40px 30px; }
+      .login-right { padding: 40px 30px; }
+    }
+  </style>
+</head>
+<body class="login-portal">
+  <div class="bg-animated">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+  </div>
+
+  <div class="login-page">
+    <nav style="position:fixed;top:20px;left:24px;right:24px;z-index:10;display:flex;justify-content:space-between;align-items:center;font-size:13px;flex-wrap:wrap;gap:12px;">
+      <a href="/" style="color:#a78bfa;text-decoration:none;font-weight:600;">← Home</a>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <label class="theme-toggle" title="Light / dark theme">
+          <input type="checkbox" class="theme-toggle-input" aria-label="Use light theme">
+          <span class="theme-toggle-track"><span class="theme-toggle-knob"></span></span>
+          <span class="theme-toggle-label-text">Light</span>
+        </label>
+        <a href="/admin" style="color:var(--text-muted);text-decoration:none;">Admin</a>
+      </div>
+    </nav>
+    <div class="login-wrapper">
+      <!-- Left Panel -->
+      <div class="login-left">
+        <div class="brand-logo">🛡️</div>
+        <div class="brand-name">ExamGuard AI</div>
+        <p class="brand-tagline">Next-generation AI-powered exam monitoring platform for secure online assessments.</p>
+        <ul class="feature-list">
+          <li>
+            <div class="feature-icon">🤖</div>
+            <span>Real-time AI face detection & monitoring</span>
+          </li>
+          <li>
+            <div class="feature-icon">🔒</div>
+            <span>Advanced security controls & restrictions</span>
+          </li>
+          <li>
+            <div class="feature-icon">📧</div>
+            <span>Instant admin alerts via email</span>
+          </li>
+          <li>
+            <div class="feature-icon">📊</div>
+            <span>Comprehensive violation logging</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="login-right">
+        <h2>Welcome Back 👋</h2>
+        <p>Enter your credentials to begin the examination</p>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label>Student Name</label>
+            <input type="text" id="studentName" placeholder="Enter your full name" required autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label>Registration Number</label>
+            <input type="text" id="regNumber" placeholder="e.g. 24BET10017" required autocomplete="off">
+          </div>
+          <button type="submit" class="btn-primary">
+            Enter Examination →
+          </button>
+          <div id="errorMessage" class="error-msg" style="display:none;"></div>
+        </form>
+
+        <div class="consent-text">
+          <span>⚠️</span>
+          <span>By entering the exam, you consent to AI-based webcam monitoring. Any suspicious activity will be recorded and reported to the administrator.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.textContent = 'Entering...';
+      btn.disabled = true;
+
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('studentName').value,
+          registration_number: document.getElementById('regNumber').value
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = '/exam';
+      } else {
+        document.getElementById('errorMessage').textContent = data.message;
+        document.getElementById('errorMessage').style.display = 'block';
+        btn.textContent = 'Enter Examination →';
+        btn.disabled = false;
+      }
+    });
+  </script>
+  <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
+</body>
+</html>
