@@ -152,3 +152,6 @@ git push origin main
 ```
 
 Add other modified files to `git add` as needed. Ensure **`docs/screenshots/*.png`** is committed so images render on GitHub.
+
+## Documentation Status
+Last documentation review: 17 September 2026
